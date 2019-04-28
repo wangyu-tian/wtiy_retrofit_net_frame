@@ -1,0 +1,17 @@
+<resources>
+    <string name="dialog_sure">确定</string>
+    <string name="dialog_no">取消</string>
+
+    <string name="file_download_title">文件下载</string>
+    <string name="file_download_msg">文件正在下载，请稍后！</string>
+    <string name="file_download_back">后台下载</string>
+    <string name="file_download_back_info">已在后台下载，请注意查看下载通知！</string>
+    <string name="file_download_ing">正在下载</string>
+    <string name="file_download_progress">下载进度</string>
+    <string name="file_download_finish">下载完成</string>
+    <string name="file_download_error">下载失败</string>
+
+    <string name="file_download_exist_start">文件已存在，是否重新下载？</string>
+    <string name="file_download_exist_continue">文件已存在，是否继续下载？</string>
+
+</resources>
