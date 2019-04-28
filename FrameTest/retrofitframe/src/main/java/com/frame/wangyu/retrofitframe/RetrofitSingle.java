@@ -3,6 +3,7 @@ package com.frame.wangyu.retrofitframe;
 import android.Manifest;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.frame.wangyu.retrofitframe.common.LogInterceptor;
@@ -36,6 +37,10 @@ public class RetrofitSingle {
     private final int READ_TIME_OUT = 30;
     private Retrofit retrofit;
     private RetrofitSingle(boolean isLogInterceptor) {
+        retrofit = getRetrofitBase(isLogInterceptor,null);
+    }
+
+    private Retrofit getRetrofitBase(boolean isLogInterceptor,String baseUrl) {
         //权限请求
         OkHttpClient.Builder clientBuild = null;
         if(isLogInterceptor) {
@@ -51,23 +56,10 @@ public class RetrofitSingle {
         }
         OkHttpClient client = clientBuild.connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS).writeTimeout
                 (WRITE_TIME_OUT, TimeUnit.SECONDS).readTimeout(READ_TIME_OUT, TimeUnit.SECONDS).build();
-        retrofit = new Retrofit.Builder().client(client).addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create()).baseUrl(BASE_URL).build();
+        return  new Retrofit.Builder().client(client).addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create()).baseUrl(TextUtils.isEmpty(baseUrl)?BASE_URL:baseUrl).build();
     }
 
-    private RetrofitSingle() {
-        //权限请求
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(@NonNull Chain chain) throws IOException {
-                Request request = chain.request();
-                return chain.proceed(request);
-            }
-        }).addInterceptor(new LogInterceptor()).connectTimeout(CONNECT_TIME_OUT, TimeUnit.SECONDS).writeTimeout
-                (WRITE_TIME_OUT, TimeUnit.SECONDS).readTimeout(READ_TIME_OUT, TimeUnit.SECONDS).build();
-        retrofit = new Retrofit.Builder().client(client).addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create()).baseUrl(BASE_URL).build();
-    }
 
     /**
      * 请求权限
@@ -92,6 +84,18 @@ public class RetrofitSingle {
 
     public <T> T getRetrofitApi(Class<T>  classObject){
         return retrofit.create(classObject);
+    }
+
+    /**
+     *
+     * @param classObject API接口对象
+     * @param isFile 是否为文件下载
+     * @param baseUrl 地址
+     * @param <T>
+     * @return
+     */
+    public <T> T getRetrofitApi(Class<T>  classObject,boolean isFile,String baseUrl){
+        return getRetrofitBase(!isFile,baseUrl).create(classObject);
     }
 
     public void toSubscribe(Observable observable, Subscriber subscriber){
