@@ -2,8 +2,7 @@
     package="com.frame.wangyu.retrofitframe" >
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <application
-        android:name=".WTApplication">
+    <application>
         <receiver android:name="com.frame.wangyu.retrofitframe.common.NotificationBroadcastReceiver">
             <intent-filter>
                 <action android:name="notification_cancelled"/>

@@ -1,6 +1,6 @@
 package com.frame.wangyu.retrofitframe.constant;
 
-import com.frame.wangyu.retrofitframe.WTApplication;
+import com.frame.wangyu.retrofitframe.WTApplicationContextUtil;
 
 /**
  * Created by wangyu on 2019/4/24.
@@ -15,7 +15,7 @@ public class RetrofitConfig {
     public static final boolean DEBUG = true;//是否启动debug日志模式
 
     //下载通知栏的通道ID，不建议修改
-    public static final String DOWNLOAD_CHANNEL_ID = "yiyuan_"+ WTApplication.mContext.getPackageName()+"_channel_download";
+    public static final String DOWNLOAD_CHANNEL_ID = "yiyuan_"+ WTApplicationContextUtil.mContext.getPackageName()+"_channel_download";
 
     public static final String DOWNLOAD_FILE_SHARE_PRE = "WTIY_DOWNLOAD";//断点下载文件share前缀
 

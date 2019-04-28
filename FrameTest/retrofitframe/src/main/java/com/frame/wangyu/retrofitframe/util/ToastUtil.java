@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-import com.frame.wangyu.retrofitframe.WTApplication;
+import com.frame.wangyu.retrofitframe.WTApplicationContextUtil;
 
 /**
  * Toast工具类
@@ -53,7 +53,7 @@ public class ToastUtil {
                         toast.setText(msg);
                         toast.setDuration(len);
                     } else {
-                        toast = Toast.makeText(WTApplication.mContext, msg, len);
+                        toast = Toast.makeText(WTApplicationContextUtil.mContext, msg, len);
                     }
                     toast.show();
                 }
@@ -76,7 +76,7 @@ public class ToastUtil {
                         toast.setText(msg);
                         toast.setDuration(len);
                     } else {
-                        toast = Toast.makeText(WTApplication.mContext, msg, len);
+                        toast = Toast.makeText(WTApplicationContextUtil.mContext, msg, len);
                     }
                     toast.show();
                 }

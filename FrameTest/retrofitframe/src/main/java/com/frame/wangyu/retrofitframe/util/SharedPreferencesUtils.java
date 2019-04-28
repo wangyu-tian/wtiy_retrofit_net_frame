@@ -3,7 +3,7 @@ package com.frame.wangyu.retrofitframe.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.frame.wangyu.retrofitframe.WTApplication;
+import com.frame.wangyu.retrofitframe.WTApplicationContextUtil;
 
 /**
  * Created by wangyu on 2019/4/26.
@@ -23,8 +23,8 @@ public class SharedPreferencesUtils {
     public static void setParam( String key, Object object){
 
         String type = object.getClass().getSimpleName();
-        String file  = WTApplication.mContext.getPackageName()+"_"+FILE_NAME;
-        SharedPreferences sp = WTApplication.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
+        String file  = WTApplicationContextUtil.mContext.getPackageName()+"_"+FILE_NAME;
+        SharedPreferences sp = WTApplicationContextUtil.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
 
         if("String".equals(type)){
@@ -56,8 +56,8 @@ public class SharedPreferencesUtils {
     public static Object getParam(String key, Object defaultObject){
         String type = defaultObject.getClass().getSimpleName();
 
-        String file  = WTApplication.mContext.getPackageName()+"_"+FILE_NAME;
-        SharedPreferences sp = WTApplication.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
+        String file  = WTApplicationContextUtil.mContext.getPackageName()+"_"+FILE_NAME;
+        SharedPreferences sp = WTApplicationContextUtil.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
 
         if("String".equals(type)){
             return sp.getString(key, (String)defaultObject);
