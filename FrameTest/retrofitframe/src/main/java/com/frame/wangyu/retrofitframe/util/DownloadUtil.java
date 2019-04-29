@@ -17,6 +17,8 @@ import com.frame.wangyu.retrofitframe.R;
 import com.frame.wangyu.retrofitframe.RetrofitSingle;
 import com.frame.wangyu.retrofitframe.api.FileDownloadApi;
 import com.frame.wangyu.retrofitframe.common.DownloadListener;
+import com.frame.wangyu.retrofitframe.constant.DownloadEnum;
+import com.frame.wangyu.retrofitframe.util.model.DownloadModel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +33,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static com.frame.wangyu.retrofitframe.constant.RetrofitConfig.DOWNLOAD_FILE_SHARE_PRE;
+import static com.frame.wangyu.retrofitframe.constant.RetrofitConfig.DOWNLOAD_FILE_SHARE_SAVE;
+import static com.frame.wangyu.retrofitframe.constant.RetrofitConfig.NOTICE_DOWNLOAD_ID;
+import static com.frame.wangyu.retrofitframe.constant.RetrofitConfig.downloadModelList;
 
 /**
  * Description：Retrofit下载文件工具类
@@ -38,12 +43,14 @@ import static com.frame.wangyu.retrofitframe.constant.RetrofitConfig.DOWNLOAD_FI
 
 public class DownloadUtil {
 
-    private static class SingletonInstance {
-        private static final DownloadUtil INSTANCE = new DownloadUtil();
+    public static DownloadUtil getInstance() {
+        return new DownloadUtil();
     }
 
-    public static DownloadUtil getInstance() {
-        return DownloadUtil.SingletonInstance.INSTANCE;
+    public static DownloadUtil getInstance(DownloadModel downloadModel) {
+        DownloadUtil downloadUtil =  new DownloadUtil();
+        downloadUtil.downloadModel = downloadModel;
+        return downloadUtil;
     }
 
     private static final String TAG = "DownloadUtil";
@@ -54,9 +61,16 @@ public class DownloadUtil {
     private Call<ResponseBody> mCall;
     private File mFile;
     private Thread mThread;
-    private String mFilePath; //下载到本地的文件路径
+    private DownloadModel downloadModel;
+    private ProgressDialog progressDialog;
+    private DownloadListener downloadListenerCustomer;
+
+    public DownloadModel getDownloadModel() {
+        return downloadModel;
+    }
 
     private DownloadUtil() {
+        downloadModel = new DownloadModel();
         if (mApi == null) {
             //初始化网络请求接口
             mApi =  RetrofitSingle.getInstanceStream().getRetrofitApi(FileDownloadApi.class);
@@ -72,10 +86,13 @@ public class DownloadUtil {
      * @param isShowDialog 是否显示下载进度条
      * @param isCanCancel 是否可以对进度条进行任意取消
      * @param isContinue 是否支持断点续传
+     * @param downloadListener 下载进度监听器
      */
-    public void downloadFileDefault(final Context context, String url, String savePath, final String fileName, boolean isShowDialog, boolean isCanCancel,boolean isContinue){
-        final ProgressDialog progressDialog = new ProgressDialog(context);//实例化ProgressDialog
+    public void downloadFileDefault(final Context context, String url, String savePath, final String fileName, boolean isShowDialog, boolean isCanCancel,boolean isContinue,DownloadListener downloadListener){
+        downloadModel.downUrl = url;
+        downloadListenerCustomer = downloadListener;
         if(isShowDialog) {
+            progressDialog = new ProgressDialog(context);//实例化ProgressDialog
             progressDialog.setMax(100);//设置最大值
             progressDialog.setTitle(context.getString(R.string.file_download_title));//设置标题
             progressDialog.setIcon(R.drawable.download_icon);//设置标题小图标
@@ -91,40 +108,64 @@ public class DownloadUtil {
                 }
             });
         }
-        final DownloadNotificationUtil downloadNotificationUtil = new DownloadNotificationUtil((int)Math.random()*10000);
-        DownloadUtil.getInstance().downloadFile(context,url,
-                savePath,fileName, progressDialog,isContinue,new DownloadListener() {
+        final DownloadNotificationUtil downloadNotificationUtil = new DownloadNotificationUtil();
+        downloadFile(context, url,
+                savePath, fileName, progressDialog, isContinue, new DownloadListener() {
                     @Override
                     public void onStart() {
                         LogUtils.i("开始下载");
-                        progressDialog.setProgress(0);
+                        if (progressDialog != null)
+                            progressDialog.setProgress(0);
                     }
 
                     @Override
                     public void onProgress(int currentLength) {
-                        LogUtils.i("正在下载"+currentLength);
-                        progressDialog.setProgress(currentLength);
-                        downloadNotificationUtil.sendDefaultNotice(context,context.getString(R.string.file_download_ing)+(TextUtils.isEmpty(fileName)?"":fileName),
-                                context.getString(R.string.file_download_progress)+"："+currentLength+"%",currentLength);
+                        LogUtils.i("正在下载" + currentLength);
+                        downloadModel.progress = currentLength;
+                        downloadModel.downType = DownloadEnum.Downloading.getCode();
+                        if (progressDialog != null)
+                            progressDialog.setProgress(currentLength);
+                        SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
+                        downloadNotificationUtil.sendDefaultNotice(context, context.getString(R.string.file_download_ing) + (TextUtils.isEmpty(fileName) ? "" : fileName),
+                                context.getString(R.string.file_download_progress) + "：" + currentLength + "%", currentLength
+                                , NOTICE_DOWNLOAD_ID + downloadModel.id);
                     }
 
                     @Override
                     public void onFinish(String localPath) {
                         LogUtils.i("下载完成");
-                        if(progressDialog.isShowing()) {
+                        downloadModel.downType = DownloadEnum.DownloadFinish.getCode();
+                        if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.cancel();
                         }
-                        downloadNotificationUtil.cancelNotification(context);
-                        ToastUtil.showMessage(context.getString(R.string.file_download_finish));
+                        downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
+                        downloadModelList.remove(downloadModel);
+                        SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
+//                        ToastUtil.showMessage(context.getString(R.string.file_download_finish));
                     }
 
                     @Override
                     public void onFailure() {
                         LogUtils.i("下载失败");
-                        ToastUtil.showMessage(context.getString(R.string.file_download_error));
-                        if(progressDialog.isShowing()) {
+                        downloadModel.downType = DownloadEnum.DownloadFail.getCode();
+                        SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
+//                        ToastUtil.showMessage(context.getString(R.string.file_download_error));
+                        if (progressDialog.isShowing()) {
                             progressDialog.cancel();
                         }
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        downloadModelList.remove(downloadModel);
+                        SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
+                        downloadModel.downType = DownloadEnum.DownloadCancel.getCode();
+                    }
+
+                    @Override
+                    public void onPause() {
+                        SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
+                        downloadModel.downType = DownloadEnum.DownloadPause.getCode();
                     }
                 });
     }
@@ -145,17 +186,18 @@ public class DownloadUtil {
             }else{
                 name = File.separator+fileName;
             }
-            mFilePath = PATH_CHALLENGE_FILE +
+            downloadModel.mFilePath = PATH_CHALLENGE_FILE +
                     name;
+            downloadModel.fileName = name.substring(1,name.length());
         }
-        if (TextUtils.isEmpty(mFilePath)) {
+        if (TextUtils.isEmpty(downloadModel.mFilePath)) {
             Log.e(TAG, "downloadFile: 存储路径为空了");
             return;
         }
         //建立一个文件
-        mFile = new File(mFilePath);
+        mFile = new File(downloadModel.mFilePath);
         if(!(!FileUtils.isFileExists(mFile) && FileUtils.createOrExistsFile(mFile)) ){
-            final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+mFilePath,0l):0;
+            final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
             String text = "";
             if(currentProgress!=0){
                 //存在下载记录
@@ -167,7 +209,9 @@ public class DownloadUtil {
                 @Override
                 public void onSure() {
                     mFile.deleteOnExit();
-                    progressDialog.show();
+                    if(progressDialog != null) {
+                        progressDialog.show();
+                    }
                     if(currentProgress == 0) {
                         downloadFile(url, downloadListener);
                     }else{
@@ -196,6 +240,8 @@ public class DownloadUtil {
         downloadFile(url,currentProgress, downloadListener);
     }
     private void downloadFile(String url,final DownloadListener downloadListener){
+        downloadModelList.add(downloadModel);
+        downloadModel.id = downloadModelList.size();
         downloadFile(url,0,downloadListener);
     }
     private void downloadFile(String url,final long currentProgress,final DownloadListener downloadListener){
@@ -234,12 +280,14 @@ public class DownloadUtil {
     //将下载的文件写入本地存储
     private void writeFile2Disk(Response<ResponseBody> response, File file,long currentProgress, DownloadListener downloadListener) {
         downloadListener.onStart();
+        if(downloadListenerCustomer!=null)downloadListenerCustomer.onStart();
         long currentLength = currentProgress;
         OutputStream os = null;
 
         InputStream is = response.body().byteStream(); //获取下载输入流
         long totalLength = response.body().contentLength();
         totalLength = totalLength+currentProgress;
+        downloadModel.size = totalLength;
         try {
             if(currentProgress == 0) {
                 os = new FileOutputStream(file); //输出流
@@ -247,8 +295,18 @@ public class DownloadUtil {
                 os = new FileOutputStream(file,true); //追写输出流
             }
             int len;
-            byte[] buff = new byte[1024];
+            byte[] buff = new byte[1024*10];
             while ((len = is.read(buff)) != -1) {
+                if(downloadModel.downType ==  DownloadEnum.DownloadCancel.getCode()){//取消下载
+                    file.deleteOnExit();
+                    downloadListener.onCancel();
+                    if(downloadListenerCustomer!=null)downloadListenerCustomer.onCancel();
+                    break;
+                }else if(downloadModel.downType ==  DownloadEnum.DownloadPause.getCode()){//暂停下载
+                    downloadListener.onPause();
+                    if(downloadListenerCustomer!=null)downloadListenerCustomer.onPause();
+                    break;
+                }
                 os.write(buff, 0, len);
                 currentLength += len;
                 Log.i(TAG, "当前进度: " + currentLength);
@@ -256,9 +314,11 @@ public class DownloadUtil {
                 SharedPreferencesUtils.setParam(DOWNLOAD_FILE_SHARE_PRE+file.getPath(),currentLength);
                 //计算当前下载百分比，并经由回调传出
                 downloadListener.onProgress((int) (100 * currentLength / totalLength));
+                if(downloadListenerCustomer!=null)downloadListenerCustomer.onProgress((int) (100 * currentLength / totalLength));
                 //当百分比为100时下载结束，调用结束回调，并传出下载后的本地路径
                 if ((int) (100 * currentLength / totalLength) >= 100) {
-                    downloadListener.onFinish(mFilePath); //下载完成
+                    downloadListener.onFinish(downloadModel.mFilePath); //下载完成
+                    if(downloadListenerCustomer!=null)downloadListenerCustomer.onFinish(downloadModel.mFilePath); //下载完成
                     SharedPreferencesUtils.setParam(DOWNLOAD_FILE_SHARE_PRE+file.getPath(),0l);
                 }
             }

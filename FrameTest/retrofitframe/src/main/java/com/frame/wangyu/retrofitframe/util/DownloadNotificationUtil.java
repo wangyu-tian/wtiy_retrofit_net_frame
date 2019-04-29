@@ -34,17 +34,14 @@ public  class DownloadNotificationUtil {
 
     private PendingIntent pendingIntentClick;
     private PendingIntent pendingIntentCancel;
-    private int NOTICE_DOWNLOAD_ID;
-
     public final static String NOTIFICATION_CLICKED = "notification_clicked";
 
     public final static String NOTIFICATION_CANCELLED = "notification_cancelled";
 
-    public DownloadNotificationUtil(int downLoadId){
-        NOTICE_DOWNLOAD_ID = downLoadId;
+    public DownloadNotificationUtil(){
     }
 
-    public  void sendDefaultNotice(Context context, String title, String desc, int progress) {
+    public  void sendDefaultNotice(Context context, String title, String desc, int progress,int noticeId) {
         clickNotification(context);
         String id = DOWNLOAD_CHANNEL_ID;//下载通道
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
@@ -74,7 +71,7 @@ public  class DownloadNotificationUtil {
         }
 //        MediaPlayer mMediaPlayer= MediaPlayer.create(context, R.raw.n84146);
 //        mMediaPlayer.start();
-        notificationManager.notify(NOTICE_DOWNLOAD_ID, notification);
+        notificationManager.notify(noticeId, notification);
 
 
     }
@@ -91,9 +88,9 @@ public  class DownloadNotificationUtil {
         pendingIntentCancel = PendingIntent.getBroadcast(context, 0, intentCancel, PendingIntent.FLAG_ONE_SHOT);
     }
 
-    public  void cancelNotification(Context context) {
+    public  void cancelNotification(Context context,int noticeId) {
         NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        manager.cancel(NOTICE_DOWNLOAD_ID);
+        manager.cancel(noticeId);
     }
 
     private  String getTime() {

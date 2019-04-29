@@ -41,7 +41,7 @@ public class Test extends Activity {
             @Override
             public void run() {
                 DownloadUtil.getInstance().downloadFileDefault(mContext,"/yy-face/images/test.mp4",null,
-                        "测试视频.mp4",true,false,true);
+                        "测试视频.mp4",true,false,true,null);
             }
         });
     }

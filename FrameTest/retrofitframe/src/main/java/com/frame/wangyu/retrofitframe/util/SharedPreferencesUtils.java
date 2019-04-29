@@ -4,6 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.frame.wangyu.retrofitframe.WTApplicationContextUtil;
+import com.frame.wangyu.retrofitframe.util.model.DownloadModel;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by wangyu on 2019/4/26.
@@ -15,6 +22,39 @@ public class SharedPreferencesUtils {
      */
     private static final String FILE_NAME = "share_yiyuan_wtiy";
 
+    private static String file  = WTApplicationContextUtil.mContext.getPackageName()+"_"+FILE_NAME;
+    private static SharedPreferences sp = WTApplicationContextUtil.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
+
+    public static void  main(String[] args){
+
+        DialogUtil dialogUtil = new DialogUtil();
+        String type = dialogUtil.getClass().getSimpleName();
+        System.out.print(type);
+    }
+
+    public static void setDownloadUtilList(String key,List<DownloadModel> downloadModelList) {
+        SharedPreferences.Editor editor = sp.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(downloadModelList);
+        editor.putString(key, json);
+        editor.commit();
+    }
+
+    public static void setDownloadUtil(String key,DownloadModel downloadModel) {
+        SharedPreferences.Editor editor = sp.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(downloadModel);
+        editor.putString(key, json);
+        editor.commit();
+    }
+
+    public static  List<DownloadModel> getDownloadUtilList(String key) {
+        Gson gson = new Gson();
+        String json = sp.getString(key, null);
+        Type type = new TypeToken<List<DownloadModel>>() {}.getType();
+        List<DownloadModel> arrayList = gson.fromJson(json, type);
+        return arrayList;
+    }
     /**
      * 保存数据的方法，我们需要拿到保存数据的具体类型，然后根据类型调用不同的保存方法
      * @param key
@@ -23,8 +63,6 @@ public class SharedPreferencesUtils {
     public static void setParam( String key, Object object){
 
         String type = object.getClass().getSimpleName();
-        String file  = WTApplicationContextUtil.mContext.getPackageName()+"_"+FILE_NAME;
-        SharedPreferences sp = WTApplicationContextUtil.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
 
         if("String".equals(type)){
@@ -55,9 +93,6 @@ public class SharedPreferencesUtils {
      */
     public static Object getParam(String key, Object defaultObject){
         String type = defaultObject.getClass().getSimpleName();
-
-        String file  = WTApplicationContextUtil.mContext.getPackageName()+"_"+FILE_NAME;
-        SharedPreferences sp = WTApplicationContextUtil.mContext.getSharedPreferences(file, Context.MODE_PRIVATE);
 
         if("String".equals(type)){
             return sp.getString(key, (String)defaultObject);
