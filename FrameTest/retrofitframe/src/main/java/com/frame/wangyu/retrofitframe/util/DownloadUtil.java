@@ -4,7 +4,6 @@ package com.frame.wangyu.retrofitframe.util;
  * Created by wangyu on 2019/4/25.
  */
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,6 +52,18 @@ public class DownloadUtil {
         return downloadUtil;
     }
 
+    public static DownloadUtil getInstance(String baseUrl) {
+        return new DownloadUtil(baseUrl);
+    }
+
+    public static DownloadUtil getInstance(String baseUrl,DownloadModel downloadModel) {
+        if(downloadModel == null)
+            return getInstance(baseUrl);
+        DownloadUtil downloadUtil =  new DownloadUtil(baseUrl);
+        downloadUtil.downloadModel = downloadModel;
+        return downloadUtil;
+    }
+
     private static final String TAG = "DownloadUtil";
     private static String PATH_CHALLENGE_FILE;
     private static final String SAVE_PATH_FOLDER_DEFAULT = "/retrofit_wtiy";
@@ -74,6 +85,14 @@ public class DownloadUtil {
         if (mApi == null) {
             //初始化网络请求接口
             mApi =  RetrofitSingle.getInstanceStream().getRetrofitApi(FileDownloadApi.class);
+        }
+    }
+
+    private DownloadUtil(String baseUrl) {
+        downloadModel = new DownloadModel();
+        if (mApi == null) {
+            //初始化网络请求接口
+            mApi =  RetrofitSingle.getInstanceStream().getRetrofitApi(FileDownloadApi.class,true,baseUrl);
         }
     }
 
@@ -149,8 +168,8 @@ public class DownloadUtil {
                         LogUtils.i("下载失败");
                         downloadModel.downType = DownloadEnum.DownloadFail.getCode();
                         SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
-//                        ToastUtil.showMessage(context.getString(R.string.file_download_error));
-                        if (progressDialog.isShowing()) {
+                        downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
+                        if (progressDialog != null && progressDialog.isShowing()) {
                             progressDialog.cancel();
                         }
                     }
@@ -160,12 +179,14 @@ public class DownloadUtil {
                         downloadModelList.remove(downloadModel);
                         SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
                         downloadModel.downType = DownloadEnum.DownloadCancel.getCode();
+                        downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
                     }
 
                     @Override
                     public void onPause() {
                         SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
                         downloadModel.downType = DownloadEnum.DownloadPause.getCode();
+                        downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
                     }
                 });
     }
@@ -196,37 +217,46 @@ public class DownloadUtil {
         }
         //建立一个文件
         mFile = new File(downloadModel.mFilePath);
-        if(!(!FileUtils.isFileExists(mFile) && FileUtils.createOrExistsFile(mFile)) ){
-            final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
-            String text = "";
-            if(currentProgress!=0){
-                //存在下载记录
-                text = context.getString(R.string.file_download_exist_continue);
-            }else{
-                text = context.getString(R.string.file_download_exist_start);
-            }
-            DialogUtil.confirmDialog(context,text, new DialogUtil.FeedBack() {
-                @Override
-                public void onSure() {
-                    mFile.deleteOnExit();
-                    if(progressDialog != null) {
-                        progressDialog.show();
-                    }
-                    if(currentProgress == 0) {
-                        downloadFile(url, downloadListener);
-                    }else{
-                        downloadFileContinue(url,currentProgress,downloadListener);
-                    }
-                }
-
-                @Override
-                public void onNo() {
-                }
-            });
+        //此处直接进行断点下载
+        final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
+        if(currentProgress == 0) {
+            downloadFile(url, downloadListener);
         }else{
-            progressDialog.show();
-            downloadFile(url,downloadListener);
+            downloadFileContinue(url,currentProgress,downloadListener);
         }
+        //屏蔽的代码为继续下载提示
+//        if(!(!FileUtils.isFileExists(mFile) && FileUtils.createOrExistsFile(mFile)) ){
+//            final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
+//            String text = "";
+//            if(currentProgress!=0){
+//                //存在下载记录
+//                text = context.getString(R.string.file_download_exist_continue);
+//            }else{
+//                text = context.getString(R.string.file_download_exist_start);
+//            }
+//            DialogUtil.confirmDialog(context,text, new DialogUtil.FeedBack() {
+//                @Override
+//                public void onSure() {
+//                    mFile.deleteOnExit();
+//                    if(progressDialog != null) {
+//                        progressDialog.show();
+//                    }
+//                    if(currentProgress == 0) {
+//                        downloadFile(url, downloadListener);
+//                    }else{
+//                        downloadFileContinue(url,currentProgress,downloadListener);
+//                    }
+//                }
+//
+//                @Override
+//                public void onNo() {
+//                }
+//            });
+//        }else{
+//            if(progressDialog != null)
+//            progressDialog.show();
+//            downloadFile(url,downloadListener);
+//        }
     }
 
 
@@ -240,8 +270,10 @@ public class DownloadUtil {
         downloadFile(url,currentProgress, downloadListener);
     }
     private void downloadFile(String url,final DownloadListener downloadListener){
-        downloadModelList.add(downloadModel);
-        downloadModel.id = downloadModelList.size();
+        if(downloadModel.id == 0) {
+            downloadModelList.add(downloadModel);
+            downloadModel.id = downloadModelList.size();
+        }
         downloadFile(url,0,downloadListener);
     }
     private void downloadFile(String url,final long currentProgress,final DownloadListener downloadListener){

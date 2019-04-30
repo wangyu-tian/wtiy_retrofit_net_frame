@@ -4,10 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.frame.wangyu.retrofitframe.common.LogInterceptor;
-import com.frame.wangyu.retrofitframe.util.LogUtils;
 import com.frame.wangyu.retrofitframe.util.PermissionUtils;
 
 import java.io.IOException;

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.widget.ImageView;
 
@@ -42,7 +43,7 @@ public class CustomProgressDialog extends Dialog {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         ImageView imageView = findViewById(R.id.iv_progress);
-        imageView.setImageDrawable(mContext.getResources().getDrawable(R.drawable.anim_loading));
+        imageView.setImageDrawable(ContextCompat.getDrawable(mContext,R.drawable.anim_loading));
         mAnimationDrawable = (AnimationDrawable) imageView.getDrawable();
         mAnimationDrawable.start();
     }

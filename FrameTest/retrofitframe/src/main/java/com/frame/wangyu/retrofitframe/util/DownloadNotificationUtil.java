@@ -49,8 +49,7 @@ public  class DownloadNotificationUtil {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel mChannel = new NotificationChannel(id, title, NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(mChannel);
-            notification = new Notification.Builder(context)
-                    .setChannelId(id)
+            notification = new Notification.Builder(context,id)
                     .setContentTitle(title)
                     .setContentText(desc)
                     .setProgress(100, progress, false)
@@ -59,7 +58,7 @@ public  class DownloadNotificationUtil {
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),R.drawable.download_icon))
                     .setSmallIcon(R.drawable.download_icon).build();
         } else {
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context,id)
                     .setContentTitle(title)
                     .setContentText(desc)
                     .setProgress(100, progress, false)
