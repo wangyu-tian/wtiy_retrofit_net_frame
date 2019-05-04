@@ -14,7 +14,7 @@ public class RetrofitConfig {
     //https://nodejs.org/dist/v12.0.0/node-v12.0.0-x64.msi
     //http://192.168.1.166:8090/yy-face/images/269ea6add14befb71b0fa0c9c3fcf617.png
 //    public static final String BASE_URL = "http://192.168.1.166:8090";
-    public static final String BASE_URL = "http://www.tuling123.com";
+    public static String BASE_URL = "http://www.tuling123.com";
 
     public static final boolean DEBUG = true;//是否启动debug日志模式
 

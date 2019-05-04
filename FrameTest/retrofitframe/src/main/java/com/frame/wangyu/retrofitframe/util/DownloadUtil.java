@@ -183,7 +183,7 @@ public class DownloadUtil {
                     }
 
                     @Override
-                    public void onPause() {
+                     public void onPause() {
                         SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
                         downloadModel.downType = DownloadEnum.DownloadPause.getCode();
                         downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
