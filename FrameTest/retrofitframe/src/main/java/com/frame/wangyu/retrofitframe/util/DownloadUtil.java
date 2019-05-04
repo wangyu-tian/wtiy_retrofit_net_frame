@@ -183,7 +183,7 @@ public class DownloadUtil {
                     }
 
                     @Override
-                     public void onPause() {
+                    public void onPause() {
                         SharedPreferencesUtils.setDownloadUtilList(DOWNLOAD_FILE_SHARE_SAVE, downloadModelList);
                         downloadModel.downType = DownloadEnum.DownloadPause.getCode();
                         downloadNotificationUtil.cancelNotification(context, NOTICE_DOWNLOAD_ID + downloadModel.id);
@@ -217,46 +217,44 @@ public class DownloadUtil {
         }
         //建立一个文件
         mFile = new File(downloadModel.mFilePath);
-        //此处直接进行断点下载
-        final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
-        if(currentProgress == 0) {
-            downloadFile(url, downloadListener);
-        }else{
-            downloadFileContinue(url,currentProgress,downloadListener);
-        }
+
         //屏蔽的代码为继续下载提示
-//        if(!(!FileUtils.isFileExists(mFile) && FileUtils.createOrExistsFile(mFile)) ){
-//            final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
-//            String text = "";
-//            if(currentProgress!=0){
-//                //存在下载记录
-//                text = context.getString(R.string.file_download_exist_continue);
-//            }else{
-//                text = context.getString(R.string.file_download_exist_start);
-//            }
-//            DialogUtil.confirmDialog(context,text, new DialogUtil.FeedBack() {
-//                @Override
-//                public void onSure() {
-//                    mFile.deleteOnExit();
-//                    if(progressDialog != null) {
-//                        progressDialog.show();
-//                    }
-//                    if(currentProgress == 0) {
-//                        downloadFile(url, downloadListener);
-//                    }else{
-//                        downloadFileContinue(url,currentProgress,downloadListener);
-//                    }
-//                }
-//
-//                @Override
-//                public void onNo() {
-//                }
-//            });
-//        }else{
-//            if(progressDialog != null)
-//            progressDialog.show();
-//            downloadFile(url,downloadListener);
-//        }
+        final long currentProgress = isContinue?(long)SharedPreferencesUtils.getParam(DOWNLOAD_FILE_SHARE_PRE+downloadModel.mFilePath,0l):0;
+        if(this.progressDialog!=null && !(!FileUtils.isFileExists(mFile) && FileUtils.createOrExistsFile(mFile)) ){
+            String text = "";
+            if(currentProgress!=0){
+                //存在下载记录
+                text = context.getString(R.string.file_download_exist_continue);
+            }else{
+                text = context.getString(R.string.file_download_exist_start);
+            }
+            DialogUtil.confirmDialog(context,text, new DialogUtil.FeedBack() {
+                @Override
+                public void onSure() {
+                    mFile.deleteOnExit();
+                    if(progressDialog != null) {
+                        progressDialog.show();
+                    }
+                    if(currentProgress == 0) {
+                        downloadFile(url, downloadListener);
+                    }else{
+                        downloadFileContinue(url,currentProgress,downloadListener);
+                    }
+                }
+
+                @Override
+                public void onNo() {
+                }
+            });
+        }else{
+            if(progressDialog != null)
+                progressDialog.show();
+            if(currentProgress == 0) {
+                downloadFile(url, downloadListener);
+            }else{
+                downloadFileContinue(url,currentProgress,downloadListener);
+            }
+        }
     }
 
 
