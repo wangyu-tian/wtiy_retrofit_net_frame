@@ -3,6 +3,7 @@
 初始化代码
 
 WTApplicationContextUtil.initContext(mContext);//配置初始化
+
 RetrofitModel.getInstance().aiTuLing("武松打虎",
         new ProgressSubscriber<>(new SubscriberOnNextListener<TuLingResponse>() {
     @Override
@@ -52,4 +53,5 @@ allprojects {
         maven { url "https://jitpack.io" }
     }
 }
+
 implementation 'com.github.yiyuan-wangyu:wtiy_retrofit_net_frame:0.4'
