@@ -55,8 +55,13 @@ allprojects {
 }
 
 implementation 'com.github.yiyuan-wangyu:wtiy_retrofit_net_frame:0.4'
+
 implementation 'io.reactivex:rxjava:1.3.0'
+
 implementation 'io.reactivex:rxandroid:1.1.0'
+
 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+
 implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+
 implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
