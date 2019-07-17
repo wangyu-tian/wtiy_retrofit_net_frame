@@ -4,14 +4,13 @@
 
 WTApplicationContextUtil.initContext(mContext);//配置初始化
 
-RetrofitModel.getInstance().aiTuLing("武松打虎",
+
+ RetrofitModel.getInstance().aiTuLing("武松打虎",
         new ProgressSubscriber<>(new SubscriberOnNextListener<TuLingResponse>() {
     @Override
     public void onNext(TuLingResponse tuLingResponse) {
         Toast.makeText(mContext,tuLingResponse.code+":"+tuLingResponse.text,Toast.LENGTH_LONG).show();
     }
- 
-
     @Override
     public void onError(Throwable e) {
         Toast.makeText(mContext,e.getMessage(),Toast.LENGTH_LONG).show();
@@ -26,11 +25,8 @@ RetrofitModel.getInstance().aiTuLing("武松打虎",
  * @param savePath 保存路径
  * @param isShowDialog 是否显示下载进度条
  * @param isCanCancel 是否可以对进度条进行任意取消
-
  * @param isContinue 是否可以断点下载
-
  * @param downloadListener 下载进度监听器
-
  */
 DownloadUtil.getInstance().downloadFileDefault(mContext,"/yy-face/images/test.mp4",null
         ,true,false,true,null);
@@ -54,14 +50,9 @@ allprojects {
     }
 }
 
-implementation 'com.github.yiyuan-wangyu:wtiy_retrofit_net_frame:0.4'
-
+implementation 'com.github.yiyuan-wangyu:wtiy_retrofit_net_frame:0.6'
 implementation 'io.reactivex:rxjava:1.3.0'
-
 implementation 'io.reactivex:rxandroid:1.1.0'
-
 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-
 implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-
 implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
