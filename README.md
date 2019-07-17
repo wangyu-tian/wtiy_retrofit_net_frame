@@ -6,17 +6,17 @@ WTApplicationContextUtil.initContext(mContext);//配置初始化
 
 访问http代码
 
-RetrofitModel.getInstance().aiTuLing("武松打虎",
-        new ProgressSubscriber<>(new SubscriberOnNextListener<TuLingResponse>() {
-    @Override
-    public void onNext(TuLingResponse tuLingResponse) {
-        Toast.makeText(mContext,tuLingResponse.code+":"+tuLingResponse.text,Toast.LENGTH_LONG).show();
-    }
-    @Override
-    public void onError(Throwable e) {
-        Toast.makeText(mContext,e.getMessage(),Toast.LENGTH_LONG).show();
-    }
-},mContext));
+        RetrofitModel.getInstance().aiTuLing("武松打虎",
+                new ProgressSubscriber<>(new SubscriberOnNextListener<TuLingResponse>() {
+                    @Override
+                    public void onNext(TuLingResponse tuLingResponse) {
+                        tvShow.setText(tuLingResponse.text);
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        tvShow.setText(e.getMessage());
+                    }
+                },mContext));
 
 2.增加文件下载进度条显示
 
