@@ -4,8 +4,9 @@
 
 WTApplicationContextUtil.initContext(mContext);//配置初始化
 
+访问http代码
 
- RetrofitModel.getInstance().aiTuLing("武松打虎",
+RetrofitModel.getInstance().aiTuLing("武松打虎",
         new ProgressSubscriber<>(new SubscriberOnNextListener<TuLingResponse>() {
     @Override
     public void onNext(TuLingResponse tuLingResponse) {
