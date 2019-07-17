@@ -16,6 +16,7 @@ WTApplicationContextUtil.initContext(mContext);//配置初始化
         Toast.makeText(mContext,e.getMessage(),Toast.LENGTH_LONG).show();
     }
 },mContext));
+
 2.增加文件下载进度条显示
 
 /**
@@ -51,8 +52,13 @@ allprojects {
 }
 
 implementation 'com.github.yiyuan-wangyu:wtiy_retrofit_net_frame:0.6'
+
 implementation 'io.reactivex:rxjava:1.3.0'
+
 implementation 'io.reactivex:rxandroid:1.1.0'
+
 implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+
 implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+
 implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
