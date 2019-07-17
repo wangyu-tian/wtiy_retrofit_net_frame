@@ -191,7 +191,7 @@ public class DownloadUtil {
                 });
     }
 
-    public void downloadFile(final Context context, final String url, String savePath,final String fileName,final ProgressDialog progressDialog ,
+    private void downloadFile(final Context context, final String url, String savePath,final String fileName,final ProgressDialog progressDialog ,
                              boolean isContinue,final DownloadListener downloadListener) {
         PATH_CHALLENGE_FILE = TextUtils.isEmpty(savePath)?Environment.getExternalStorageDirectory() + SAVE_PATH_FOLDER_DEFAULT
                 :Environment.getExternalStorageDirectory()+File.separator+savePath;

@@ -11,7 +11,7 @@
         android:id="@+id/download"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="新建下载任务"
+        android:text="新建下载任务(/retrofit_wtiy)"
         android:layout_centerHorizontal="true"/>
     <LinearLayout
         android:padding="20dp"
