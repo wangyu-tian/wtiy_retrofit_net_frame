@@ -32,6 +32,7 @@ WTApplicationContextUtil.initContext(mContext);//配置初始化
  * @param isContinue 是否可以断点下载
  * @param downloadListener 下载进度监听器
  */
+
 DownloadUtil.getInstance().downloadFileDefault(mContext,"/yy-face/images/test.mp4",null
         ,true,false,true,null);
 3.多文件任务同时下载
